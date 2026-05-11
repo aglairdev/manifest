@@ -4,9 +4,32 @@ Buscador de Manifests.
 
 ## Demo
 
-<img width="575" height="632" alt="2026-05-11_03-31" src="https://github.com/user-attachments/assets/0ccdef44-9aed-4ab0-bcee-43455debb86f" />
+<details>
+<summary>Início</summary>
+
 <br>
-<img width="574" height="621" alt="2026-05-11_03-31_1" src="https://github.com/user-attachments/assets/7703ac59-6ee3-4cdd-a0cd-2302ad0e3220" />
+
+<img alt="demo-inicio" src="https://github.com/user-attachments/assets/377eaa8f-1514-42ed-9989-56f0eff2038e" />
+
+</details>
+
+<details>
+<summary>Config Accela</summary>
+
+<br>
+
+<img alt="demo-config-accela" src="https://github.com/user-attachments/assets/aff309e0-a5b7-41c3-a0fb-1949c4ac26e2" />
+
+</details>
+
+<details>
+<summary>ProtonDB</summary>
+
+<br>
+
+<img alt="demo-protondb" src="https://github.com/user-attachments/assets/1942ae45-50c7-4b4b-92a4-8a88fc332466" />
+
+</details>
 
 ## Requisitos
 
@@ -14,13 +37,44 @@ Buscador de Manifests.
 
 - **Dependências**: `bash`, `curl`, `python3`.
 
-## Features
+## O que faz
 
 - Busca automatizada em 3 endpoints.
 
 - Resolução de nomes para AppID via Steam API.
 
 - Integração com Accela.
+
+- Consulta de compatibilidade Linux via ProtonDB.
+
+- Categorização (Jogo, DLC ou Soundtrack).
+
+### Legenda de cores
+
+<details>
+<summary>ProtonDB</summary>
+
+| Status | Badge | Descrição |
+| :--- | :--- | :--- |
+| **Nativo** | ![Nativo](https://img.shields.io/badge/-Nativo-32CD32?style=flat-square) | Versão oficial desenvolvida para Linux. |
+| **Platina** | ![Platina](https://img.shields.io/badge/-Platina-00FFFF?style=flat-square) | Funciona perfeitamente sem necessidade de ajustes. |
+| **Ouro** | ![Ouro](https://img.shields.io/badge/-Ouro-FFD700?style=flat-square) | Funciona perfeitamente após ajustes mínimos. |
+| **Prata** | ![Prata](https://img.shields.io/badge/-Prata-C0C0C0?style=flat-square) | Funciona, mas apresenta problemas menores. |
+| **Bronze** | ![Bronze](https://img.shields.io/badge/-Bronze-CD7F32?style=flat-square) | Jogável, mas com crashes ou bugs frequentes. |
+| **Quebrado** | ![Borked](https://img.shields.io/badge/-Borked-FF0000?style=flat-square) | Injogável ou não inicia no Linux. |
+
+</details>
+
+<details>
+<summary>SteamDB</summary>
+
+| Tipo | Badge | Descrição |
+| :--- | :--- | :--- |
+| **Jogo** | ![Jogo](https://img.shields.io/badge/-Jogo-4169E1?style=flat-square) | Título base (Base Game). |
+| **DLC** | ![DLC](https://img.shields.io/badge/-DLC-FF00FF?style=flat-square) | Conteúdo adicional para download. |
+| **Soundtrack** | ![Soundtrack](https://img.shields.io/badge/-Soundtrack-008000?style=flat-square) | Trilha sonora oficial (Música). |
+
+</details>
 
 ## Instalação 
 
