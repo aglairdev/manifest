@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Configs
-VERSION="1.0"
+VERSION="1.1"
 AGL="ꕤ"
 
 #Endpoints
@@ -18,8 +18,6 @@ FILE_MOR_CONFIG="$DIR_CONFIG/.morrenus_config"
 FILE_ACCELA_CONFIG="$DIR_CONFIG/.accela_enabled"
 BIN_REAL_ACCELA="$HOME/.local/share/ACCELA/run.sh"
 
-mkdir -p "$DIR_DOWNLOAD"
-
 #Enter-the-wired
 DIR_WIRED="$HOME/enter-the-wired"
 BIN_ACCELA="$DIR_WIRED/accela"
@@ -33,11 +31,46 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
+# Colors (ProtonDB)
+ST_PLATINA='\033[1;36m' 
+ST_OURO='\033[1;33m'    
+ST_PRATA='\033[0;37m'   
+ST_BRONZE='\033[0;33m'  
+ST_BORKED='\033[1;31m'  
+ST_NATIVO='\033[1;32m'  
+
+# Colors (Steam)
+CAT_JOGO='\033[1;34m'   
+CAT_DLC='\033[1;35m'    
+CAT_SOUND='\033[1;32m'
+
+mkdir -p "$DIR_DOWNLOAD"
+
 show_header() {
     clear
     echo -e "v${VERSION} // Manifest ${AGL}"
     echo -e "${CYAN}------------------------------------------${NC}"
     echo ""
+}
+
+get_proton_status() {
+    local ID=$1
+    local STATUS=$(curl -s --connect-timeout 2 "https://www.protondb.com/api/v1/reports/summaries/${ID}.json" | python3 -c "import sys, json; data=json.load(sys.stdin); print(data.get('tier', 'na').lower())" 2>/dev/null)
+    local URL="https://www.protondb.com/app/${ID}"
+
+    link_status() {
+        echo -ne "\e]8;;${URL}\a[${1}]\e]8;;\a"
+    }
+
+    case "$STATUS" in
+        "platinum") echo -ne "${ST_PLATINA}$(link_status "Platina")${NC}" ;;
+        "gold")     echo -ne "${ST_OURO}$(link_status "Ouro")${NC}" ;;
+        "silver")   echo -ne "${ST_PRATA}$(link_status "Prata")${NC}" ;;
+        "bronze")   echo -ne "${ST_BRONZE}$(link_status "Bronze")${NC}" ;;
+        "borked")   echo -ne "${ST_BORKED}$(link_status "Quebrado")${NC}" ;;
+        "native")   echo -ne "${ST_NATIVO}$(link_status "Nativo")${NC}" ;;
+        *)          echo -ne "${NC}[S/I]" ;;
+    esac
 }
 
 resolve_appid() {
@@ -52,18 +85,34 @@ resolve_appid() {
         echo "ERRO"
     else
         echo -e "\nResultados para '${INPUT}':\n" >&2
-        
-        local MAP=$(echo "$JSON_DATA" | python3 -c "import sys, json; data=json.load(sys.stdin); [print(f'{item[\"name\"]} (ID: {item[\"id\"]})') for item in data['items'][:5]]")
         local ids=($(echo "$JSON_DATA" | grep -oP '"id":\K[0-9]+' | head -n 5))
         
         local i=1
-        while read -r line; do
-            [ -z "$line" ] && continue
-            echo -e "[$i] $line" >&2
+        for current_id in "${ids[@]}"; do
+            local DETAILS=$(curl -s "https://store.steampowered.com/api/appdetails?appids=${current_id}")
+            local NAME=$(echo "$DETAILS" | python3 -c "import sys, json; d=json.load(sys.stdin); id=next(iter(d)); print(d[id]['data']['name']) if d[id]['success'] else print('Unknown')")
+            local TYPE=$(echo "$DETAILS" | python3 -c "import sys, json; d=json.load(sys.stdin); id=next(iter(d)); print(d[id]['data']['type']) if d[id]['success'] else print('game')")
+
+            local LINE="[${i}] ${WHITE}${NAME}${NC} (${CYAN}${current_id}${NC})"
+            
+            case "$TYPE" in
+                "dlc")
+                    LINE="${LINE} ${CAT_DLC}[DLC]${NC}"
+                    ;;
+                "music")
+                    LINE="${LINE} ${CAT_SOUND}[Soundtrack]${NC}"
+                    ;;
+                *)
+                    local P_STATUS=$(get_proton_status "$current_id")
+                    LINE="${LINE} ${CAT_JOGO}[Jogo]${NC} ${P_STATUS}"
+                    ;;
+            esac
+
+            echo -e "$LINE" >&2
             ((i++))
-        done <<< "$MAP"
+        done
         
-        echo -e "[q] Cancelar" >&2
+        echo -e "\n[q] ${RED}Cancelar${NC}" >&2
         echo "" >&2
         read -p "Selecione: " CHOICE >&2
         
@@ -109,7 +158,7 @@ menu_accela() {
             echo -e "${CYAN}------------------------------------------${NC}"
             echo -e "\nDESEJA INSTALAR AGORA?"
             echo -e "\n[1] Sim, executar enter-the-wired"
-            echo -e "[2] Não, apenas voltar"
+            echo -e "[2] Não"
         else
             if [ -f "$FILE_ACCELA_CONFIG" ]; then
                 echo -e "STATUS ATUAL: [${GREEN}ATIVADO${NC}]"
@@ -124,7 +173,7 @@ menu_accela() {
             echo -e "[2] Atualizar Accela"
             echo -e "[3] Atualizar SLSsteam"
             echo -e "[4] Remover tudo"
-            echo -e "[5] Apenas voltar"
+            echo -e "[5] Voltar"
         fi
 
         echo ""
@@ -199,7 +248,11 @@ while true; do
     case $OPT in
         1)
             echo ""
-            read -p "AppID ou Nome: " USER_INPUT
+            read -p "$(echo -e "AppID ou Nome (${RED}q${NC} para voltar): ")" USER_INPUT
+            if [[ "$USER_INPUT" == "q" ]]; then
+                continue
+            fi
+
             APPID=$(resolve_appid "$USER_INPUT")
 
             if [ "$APPID" == "ERRO" ]; then
@@ -273,7 +326,7 @@ while true; do
             echo "2. F12 > F5 > Network > Filter URLs > download > Copy as cURL"
             echo -e "${CYAN}------------------------------------------${NC}"
             echo ""
-            read -p "Cole o comando (ou 'q'): " CURL_CMD
+            read -p "$(echo -e "Cole o comando (${RED}q${NC} para voltar): ")" CURL_CMD
             if [ "$CURL_CMD" != "q" ]; then
                 COOKIE=$(echo "$CURL_CMD" | grep -oP "Cookie: \K[^']+")
                 AGENT=$(echo "$CURL_CMD" | grep -oP "User-Agent: \K[^']+")
@@ -294,7 +347,7 @@ while true; do
             echo -e "> Acesse: ${CYAN}https://hubcapmanifest.com/${NC}"
             echo -e "${CYAN}------------------------------------------${NC}"
             echo ""
-            read -p "API Key (ou 'q'): " API_KEY
+            read -p "$(echo -e "API Key (${RED}q${NC} para voltar): ")" API_KEY
             if [ "$API_KEY" != "q" ]; then
                 if [[ "$API_KEY" =~ ^smm_[a-f0-9]{96}$ ]]; then
                     mkdir -p "$DIR_CONFIG"
