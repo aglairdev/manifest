@@ -2,6 +2,12 @@
 
 Buscador de Manifests.
 
+## Demo
+
+<img width="575" height="632" alt="2026-05-11_03-31" src="https://github.com/user-attachments/assets/0ccdef44-9aed-4ab0-bcee-43455debb86f" />
+<br>
+<img width="574" height="621" alt="2026-05-11_03-31_1" src="https://github.com/user-attachments/assets/7703ac59-6ee3-4cdd-a0cd-2302ad0e3220" />
+
 ## Requisitos
 
 - **S.O**: Linux.
