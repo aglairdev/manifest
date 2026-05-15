@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Configs
-VERSION="1.1"
+VERSION="1.2"
 AGL="ꕤ"
 
 #Endpoints
@@ -16,7 +16,7 @@ DIR_DOWNLOAD="$HOME/Downloads/Manifests"
 FILE_RYU_CONFIG="$DIR_CONFIG/.ryu_config"
 FILE_MOR_CONFIG="$DIR_CONFIG/.morrenus_config"
 FILE_ACCELA_CONFIG="$DIR_CONFIG/.accela_enabled"
-BIN_REAL_ACCELA="$HOME/.local/share/ACCELA/run.sh"
+BIN_REAL_ACCELA="$HOME/.local/share/ACCELA/ACCELA.AppImage"
 
 #Enter-the-wired
 DIR_WIRED="$HOME/enter-the-wired"
@@ -51,6 +51,25 @@ show_header() {
     echo -e "v${VERSION} // Manifest ${AGL}"
     echo -e "${CYAN}------------------------------------------${NC}"
     echo ""
+}
+
+check_update() {
+    local LATEST
+    LATEST=$(curl -s --connect-timeout 3 \
+        "https://raw.githubusercontent.com/aglairdev/Manifest/main/manifest.sh" \
+        | grep '^VERSION=' | cut -d'"' -f2 2>/dev/null)
+
+    if [[ -n "$LATEST" && "$LATEST" != "$VERSION" ]]; then
+        echo -e " ${AGL} Nova versão disponível: ${GREEN}v${LATEST}${NC} (atual: ${RED}v${VERSION}${NC})"
+        echo -e "${CYAN}---------------------------------------------${NC}"
+        echo ""
+        read -p "Atualizar agora? (s/n): " UPD
+        if [[ "$UPD" == "s" ]]; then
+            curl -fsSL https://raw.githubusercontent.com/aglairdev/Manifest/main/install.sh | bash
+            exec manifest
+        fi
+        echo ""
+    fi
 }
 
 get_proton_status() {
@@ -172,8 +191,9 @@ menu_accela() {
             [ -f "$FILE_ACCELA_CONFIG" ] && echo -e "\n[1] Desativar integração" || echo -e "\n[1] Ativar integração"
             echo -e "[2] Atualizar Accela"
             echo -e "[3] Atualizar SLSsteam"
-            echo -e "[4] Remover tudo"
-            echo -e "[5] Voltar"
+            echo -e "[4] Atualizar enter-the-wired"
+            echo -e "[5] Remover tudo"
+            echo -e "[6] Voltar"
         fi
 
         echo ""
@@ -201,7 +221,12 @@ menu_accela() {
                     ;;
                 2) [ -f "$BIN_ACCELA" ] && bash "$BIN_ACCELA" || echo -e "${RED}Erro: Script ausente.${NC}"; read -p "Enter..." ;;
                 3) [ -f "$BIN_SLS" ] && bash "$BIN_SLS" || echo -e "${RED}Erro: Script ausente.${NC}"; read -p "Enter..." ;;
-                4) 
+                4)
+                    echo -e "\n${CYAN}Atualizando enter-the-wired...${NC}"
+                    curl -fsSL https://raw.githubusercontent.com/ciscosweater/enter-the-wired/main/enter-the-wired | bash
+                    read -p "Pressione Enter para continuar..."
+                    ;;
+                5) 
                     read -p "Remover Accela, SLSsteam, SLScheevo, Steamless? (s/n): " CONFIRM
                     if [ "$CONFIRM" = "s" ]; then
                         [ -f "$BIN_UNINSTALL" ] && bash "$BIN_UNINSTALL"
@@ -212,12 +237,14 @@ menu_accela() {
                         return
                     fi
                     ;;
-                5) return ;;
+                6) return ;;
                 *) echo -e "${RED}Opção inválida.${NC}"; sleep 1 ;;
             esac
         fi
     done
 }
+
+check_update
 
 while true; do
     show_header
