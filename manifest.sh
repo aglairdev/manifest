@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Configs
-VERSION="1.2"
+VERSION="1.3"
 AGL="ꕤ"
 
 #Endpoints
@@ -16,7 +16,7 @@ DIR_DOWNLOAD="$HOME/Downloads/Manifests"
 FILE_RYU_CONFIG="$DIR_CONFIG/.ryu_config"
 FILE_MOR_CONFIG="$DIR_CONFIG/.morrenus_config"
 FILE_ACCELA_CONFIG="$DIR_CONFIG/.accela_enabled"
-BIN_REAL_ACCELA="$HOME/.local/share/ACCELA/ACCELA.AppImage"
+BIN_REAL_ACCELA="$HOME/.local/share/ACCELA/run.sh"
 
 #Enter-the-wired
 DIR_WIRED="$HOME/enter-the-wired"
@@ -203,7 +203,7 @@ menu_accela() {
             case $SUB_OPT in
                 1) 
                     echo -e "\n${CYAN}Iniciando instalação...${NC}"
-                    curl -fsSL https://raw.githubusercontent.com/ciscosweater/enter-the-wired/main/enter-the-wired | bash
+                    curl -fsSL https://raw.githubusercontent.com/aglairdev/enter-the-wired/main/enter-the-wired | bash
                     read -p "Pressione Enter para continuar..." 
                     ;;
                 2) return ;;
@@ -223,7 +223,7 @@ menu_accela() {
                 3) [ -f "$BIN_SLS" ] && bash "$BIN_SLS" || echo -e "${RED}Erro: Script ausente.${NC}"; read -p "Enter..." ;;
                 4)
                     echo -e "\n${CYAN}Atualizando enter-the-wired...${NC}"
-                    curl -fsSL https://raw.githubusercontent.com/ciscosweater/enter-the-wired/main/enter-the-wired | bash
+                    curl -fsSL https://raw.githubusercontent.com/aglairdev/enter-the-wired/main/enter-the-wired | bash
                     read -p "Pressione Enter para continuar..."
                     ;;
                 5) 
