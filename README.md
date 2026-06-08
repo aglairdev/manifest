@@ -9,7 +9,7 @@ Buscador de Manifests.
 
 <br>
 
-<img alt="demo-inicio" src="https://github.com/user-attachments/assets/377eaa8f-1514-42ed-9989-56f0eff2038e" />
+<img alt="demo-inicio" src="https://github.com/user-attachments/assets/0df02197-5624-4478-9d0e-955d04a2e794" />
 
 </details>
 
@@ -18,7 +18,7 @@ Buscador de Manifests.
 
 <br>
 
-<img alt="demo-config-accela" src="https://github.com/user-attachments/assets/aff309e0-a5b7-41c3-a0fb-1949c4ac26e2" />
+<img alt="demo-config-accela" src="https://github.com/user-attachments/assets/2aa8df08-cadb-4da4-b686-fc16a7a24c2e" />
 
 </details>
 
@@ -27,7 +27,7 @@ Buscador de Manifests.
 
 <br>
 
-<img alt="demo-protondb" src="https://github.com/user-attachments/assets/1942ae45-50c7-4b4b-92a4-8a88fc332466" />
+<img alt="demo-protondb" src="https://github.com/user-attachments/assets/9abe2bd4-5693-4a69-a2d3-724cb2757311" />
 
 </details>
 
@@ -43,11 +43,13 @@ Buscador de Manifests.
 
 - Resolução de nomes para AppID via Steam API.
 
-- Integração com Accela.
+- Integração com Accela [`20260425230142`].
 
 - Consulta de compatibilidade Linux via ProtonDB.
 
 - Categorização (Jogo, DLC ou Soundtrack).
+
+- Integração com SLScheevo.
 
 ### Legenda de cores
 
