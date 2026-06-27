@@ -1,57 +1,34 @@
-# Manifest ꕤ
+<div align="center">
 
-Buscador de Manifests.
+[![MANIFEST](https://img.shields.io/badge/MANIFEST-367D28?style=for-the-badge)](https://github.com/aglairdev/Manifest)
 
-## Demo
+</div>
 
-<details>
-<summary>Início</summary>
+## Que isso?
 
-<br>
+Buscador de manifests.
 
-<img alt="demo-inicio" src="https://github.com/user-attachments/assets/0df02197-5624-4478-9d0e-955d04a2e794" />
-
-</details>
-
-<details>
-<summary>Config Accela</summary>
-
-<br>
-
-<img alt="demo-config-accela" src="https://github.com/user-attachments/assets/2aa8df08-cadb-4da4-b686-fc16a7a24c2e" />
-
-</details>
-
-<details>
-<summary>ProtonDB</summary>
-
-<br>
-
-<img alt="demo-protondb" src="https://github.com/user-attachments/assets/9abe2bd4-5693-4a69-a2d3-724cb2757311" />
-
-</details>
+![Shell](https://img.shields.io/badge/Shell-333333?style=flat-square&logo=gnu-bash&logoColor=white)
 
 ## Requisitos
 
-- **S.O**: Linux.
-
-- **Dependências**: `bash`, `curl`, `python3`.
+- **Dependências**: `bash`, `curl`, `python3`
 
 ## O que faz
 
-- Busca automatizada em 3 endpoints.
+- Busca automatizada em 3 endpoints
 
-- Resolução de nomes para AppID via Steam API.
+- Resolução de nomes para AppID via Steam API
 
-- Integração com Accela [`20260425230142`].
+- Integração com Accela [`20260425230142`]
 
-- Consulta de compatibilidade Linux via ProtonDB.
+- Consulta de compatibilidade Linux via ProtonDB
 
-- Categorização (Jogo, DLC ou Soundtrack).
+- Categorização (Jogo, DLC ou Soundtrack)
 
-- Integração com SLScheevo.
+- Integração com SLScheevo
 
-### Legenda de cores
+## Legenda de cores
 
 <details>
 <summary>ProtonDB</summary>
@@ -93,10 +70,8 @@ rm ~/.local/bin/manifest
 
 ## Créditos
 
-- **Ferramentas:** [DepotDownloaderMod](https://github.com/SteamAutoCracks/DepotDownloaderMod), [SLSsteam](https://github.com/AceSLS/SLSsteam), [SLScheevo](https://github.com/xamionex/SLScheevo), [Steamless](https://github.com/atom0s/Steamless), Accela.
+- **Ferramentas:** [DepotDownloaderMod](https://github.com/SteamAutoCracks/DepotDownloaderMod), [SLSsteam](https://github.com/AceSLS/SLSsteam), [h3adcr-b](https://github.com/Deadboy666/h3adcr-b), [SLScheevo](https://github.com/xamionex/SLScheevo), [Steamless](https://github.com/atom0s/Steamless), Accela
 
-- **Instalador universal:** [enter-the-wired](https://github.com/ciscosweater/enter-the-wired/).
+- **Instalador universal:** [enter-the-wired](https://github.com/ciscosweater/enter-the-wired/)
 
-<hr>
-
-> Apenas para fins educacionais.
+<p align="center">ꕤ AGL</p>
