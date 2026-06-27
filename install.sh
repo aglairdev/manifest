@@ -57,9 +57,31 @@ HTTP_STATUS=$(curl -L -w "%{http_code}" "$REPO_URL" -o "$DIR_CONF/manifest.sh" -
 
 if [ "$HTTP_STATUS" -eq 200 ]; then
     chmod +x "$DIR_CONF/manifest.sh"
-    ln -sf "$DIR_CONF/manifest.sh" "$DIR_BIN/manifest"
-    
-    echo -e "\n${GREEN}${CHECK} Manifest configurado com sucesso!${RESET}"
+
+    rm -f "$DIR_BIN/manifest"
+
+    if ln -s "$DIR_CONF/manifest.sh" "$DIR_BIN/manifest" 2>/dev/null; then
+        echo -e "\n${GREEN}${CHECK} Manifest configurado com sucesso!${RESET}"
+    else
+        if [[ ":$PATH:" == *":$DIR_BIN:"* ]]; then
+            if sudo ln -sf "$DIR_CONF/manifest.sh" "$DIR_BIN/manifest" 2>/dev/null; then
+                echo -e "\n${GREEN}${CHECK} Manifest configurado com sucesso!${RESET}"
+            else
+                echo -e "\n${RED}${CROSS} Não foi possível criar o link simbólico.${RESET}"
+                echo -e "Execute manualmente:"
+                echo -e "${BLUE}  sudo ln -sf $DIR_CONF/manifest.sh $DIR_BIN/manifest${RESET}"
+                exit 1
+            fi
+        else
+            echo -e "\n${RED}${CROSS} Não foi possível criar o link simbólico.${RESET}"
+            echo -e "O diretório $DIR_BIN não está no seu PATH."
+            echo -e "Adicione ao seu ~/.bashrc ou ~/.zshrc:"
+            echo -e "${BLUE}  export PATH=\$PATH:\$HOME/.local/bin${RESET}"
+            echo -e "Depois execute manualmente:"
+            echo -e "${BLUE}  sudo ln -sf $DIR_CONF/manifest.sh $DIR_BIN/manifest${RESET}"
+            exit 1
+        fi
+    fi
     
     if [[ ":$PATH:" != *":$DIR_BIN:"* ]]; then
         echo -e "\n${YELLOW}Atenção:${RESET} O diretório $DIR_BIN não está no seu PATH."
