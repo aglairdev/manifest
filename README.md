@@ -76,4 +76,8 @@ rm ~/.local/bin/manifest
 
 - **Instalador universal:** [enter-the-wired](https://github.com/ciscosweater/enter-the-wired/)
 
+## Licença
+
+[MIT](https://github.com/aglairdev/Manifest/blob/main/LICENSE)
+
 <p align="center">ꕤ AGL</p>
