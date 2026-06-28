@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Configs
-VERSION="1.5"
+VERSION="1.6"
 AGL="ꕤ"
 
 #Rotas
@@ -362,7 +362,7 @@ while true; do
                 
                 if [ -f "$FILE_ACCELA_CONFIG" ]; then
                     echo -e "${YELLOW}Enviando para Accela CLI...${NC}"
-                    accela --cli "$FILE_PATH"
+                    "$BIN_REAL_ACCELA" --cli "$FILE_PATH"
                 fi
             else
                 echo -e "\n${RED}Nenhum arquivo encontrado.${NC}"
