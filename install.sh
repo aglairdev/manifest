@@ -1,9 +1,12 @@
 #!/bin/bash
+#
+# © 2026 ~ AGL ~ github.com/aglairdev
+#
 
 YELLOW="\e[33m"
 GREEN="\e[32m"
+MAN_GREEN="\e[38;2;54;125;40m"
 RED="\e[31m"
-BLUE="\e[34m"
 RESET="\e[0m"
 CHECK="✓"
 CROSS="✗"
@@ -14,7 +17,8 @@ DIR_CONF="$HOME/.config/Manifest"
 REPO_URL="https://raw.githubusercontent.com/aglairdev/Manifest/main/manifest.sh"
 
 clear
-echo -e "${BLUE}Manifest ${AGL}${RESET}\n"
+echo ""
+echo -e "${MAN_GREEN}Manifest ${AGL}${RESET}\n"
 echo -e "Estabelecendo conexão com o repositório..."
 
 check_deps() {
@@ -61,24 +65,24 @@ if [ "$HTTP_STATUS" -eq 200 ]; then
     rm -f "$DIR_BIN/manifest"
 
     if ln -s "$DIR_CONF/manifest.sh" "$DIR_BIN/manifest" 2>/dev/null; then
-        echo -e "\n${GREEN}${CHECK} Manifest configurado com sucesso!${RESET}"
+        echo -e "\n${GREEN}${CHECK}${RESET} Manifest configurado com sucesso!"
     else
         if [[ ":$PATH:" == *":$DIR_BIN:"* ]]; then
             if sudo ln -sf "$DIR_CONF/manifest.sh" "$DIR_BIN/manifest" 2>/dev/null; then
-                echo -e "\n${GREEN}${CHECK} Manifest configurado com sucesso!${RESET}"
+                echo -e "\n${GREEN}${CHECK}${RESET} Manifest configurado com sucesso!"
             else
                 echo -e "\n${RED}${CROSS} Não foi possível criar o link simbólico.${RESET}"
                 echo -e "Execute manualmente:"
-                echo -e "${BLUE}  sudo ln -sf $DIR_CONF/manifest.sh $DIR_BIN/manifest${RESET}"
+                echo -e "${MAN_GREEN}  sudo ln -sf $DIR_CONF/manifest.sh $DIR_BIN/manifest${RESET}"
                 exit 1
             fi
         else
             echo -e "\n${RED}${CROSS} Não foi possível criar o link simbólico.${RESET}"
             echo -e "O diretório $DIR_BIN não está no seu PATH."
             echo -e "Adicione ao seu ~/.bashrc ou ~/.zshrc:"
-            echo -e "${BLUE}  export PATH=\$PATH:\$HOME/.local/bin${RESET}"
+            echo -e "${MAN_GREEN}  export PATH=\$PATH:\$HOME/.local/bin${RESET}"
             echo -e "Depois execute manualmente:"
-            echo -e "${BLUE}  sudo ln -sf $DIR_CONF/manifest.sh $DIR_BIN/manifest${RESET}"
+            echo -e "${MAN_GREEN}  sudo ln -sf $DIR_CONF/manifest.sh $DIR_BIN/manifest${RESET}"
             exit 1
         fi
     fi
@@ -86,9 +90,9 @@ if [ "$HTTP_STATUS" -eq 200 ]; then
     if [[ ":$PATH:" != *":$DIR_BIN:"* ]]; then
         echo -e "\n${YELLOW}Atenção:${RESET} O diretório $DIR_BIN não está no seu PATH."
         echo -e "Adicione esta linha ao seu .bashrc ou .zshrc para usar o comando:"
-        echo -e "${BLUE}export PATH=\$PATH:\$HOME/.local/bin${RESET}"
+        echo -e "${MAN_GREEN}export PATH=\$PATH:\$HOME/.local/bin${RESET}"
     else
-        echo -e "\nTudo pronto. Basta digitar ${BLUE}manifest${RESET} para começar.\n"
+        echo -e "\nTudo pronto. Basta digitar ${MAN_GREEN}manifest${RESET} para começar.\n"
     fi
 else
     echo -e "\n${RED}${CROSS} Ops! Ocorreu um problema ao baixar o arquivo.${RESET}"

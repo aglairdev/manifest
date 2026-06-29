@@ -1,7 +1,12 @@
 #!/bin/bash
+#
+# manifest - buscador de manifests no terminal
+# © 2026 ~ AGL ~ github.com/aglairdev
+# licença: MIT
+#
 
 #Configs
-VERSION="1.6"
+VERSION="1.7"
 AGL="ꕤ"
 
 #Rotas
@@ -30,6 +35,8 @@ CYAN='\033[0;36m'
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+MAN_GREEN='\033[38;2;54;125;40m'
 NC='\033[0m'
 
 # Cores (ProtonDB)
@@ -47,11 +54,24 @@ CAT_SOUND='\033[1;32m'
 
 mkdir -p "$DIR_DOWNLOAD"
 
+divider() {
+    local div=""
+    for i in 1 2 3 4 5 6 7; do
+        if (( i % 2 == 0 )); then
+            div+="${MAN_GREEN}─────${NC}"
+        else
+            div+="─────"
+        fi
+        (( i < 7 )) && div+=" "
+    done
+    echo -e "$div"
+}
+
 show_header() {
     clear
-    echo -e "v${VERSION} // Manifest ${AGL}"
-    echo -e "${CYAN}------------------------------------------${NC}"
     echo ""
+    echo -e "v${VERSION} // Manifest ${AGL}"
+    divider
 }
 
 check_update() {
@@ -62,7 +82,7 @@ check_update() {
 
     if [[ -n "$LATEST" && "$LATEST" != "$VERSION" ]]; then
         echo -e " ${AGL} Nova versão disponível: ${GREEN}v${LATEST}${NC} (atual: ${RED}v${VERSION}${NC})"
-        echo -e "${CYAN}---------------------------------------------${NC}"
+        divider
         echo ""
         read -p "Atualizar agora? (s/n): " UPD
         if [[ "$UPD" == "s" ]]; then
@@ -146,7 +166,7 @@ resolve_appid() {
             ((i++))
         done
         
-        echo -e "\n[q] ${RED}Cancelar${NC}" >&2
+        echo -e "\n[${RED}q${NC}] Cancelar" >&2
         echo "" >&2
         read -p "Selecione: " CHOICE >&2
         
@@ -176,12 +196,82 @@ except:
 " "$ID"
 }
 
+menu_baixar() {
+    show_header
+    read -p "$(echo -e "AppID ou Nome (${RED}q${NC} para voltar): ")" USER_INPUT
+    if [[ "$USER_INPUT" == "q" ]]; then return; fi
+
+    APPID=$(resolve_appid "$USER_INPUT")
+
+    if [ "$APPID" == "ERRO" ]; then
+        echo -e "${RED}Não encontrei nada para: $USER_INPUT${NC}"
+        read -p "  Enter para voltar..."
+        return
+    elif [ "$APPID" == "CANCEL" ]; then
+        return
+    fi
+
+    FILENAME=$(get_clean_filename "$APPID")
+    FILE_PATH="${DIR_DOWNLOAD}/${FILENAME}"
+
+    show_header
+    echo ""
+    echo -e "AppID: ${APPID}"
+    echo ""
+    FOUND=false
+
+    # Morrenus
+    if [ -f "$FILE_MOR_CONFIG" ]; then
+        source "$FILE_MOR_CONFIG"
+        echo -n "  Morrenus: "
+        HTTP_STATUS=$(curl -o "$FILE_PATH" -s -H "Authorization: Bearer $KEY" -w "%{http_code}" -L "${URL_MORRENUS}${APPID}")
+        if [ "$HTTP_STATUS" == "200" ]; then
+            echo -e "${GREEN}SUCESSO${NC}"; FOUND=true
+        elif [ "$HTTP_STATUS" == "401" ] || [ "$HTTP_STATUS" == "403" ]; then
+            echo -e "${RED}CHAVE EXPIRADA${NC}"; rm -f "$FILE_MOR_CONFIG" "$FILE_PATH"
+        else
+            echo -e "${RED}INDISPONÍVEL${NC}"; rm -f "$FILE_PATH"
+        fi
+    fi
+
+    # Ryu
+    if [ "$FOUND" = false ] && [ -f "$FILE_RYU_CONFIG" ]; then
+        source "$FILE_RYU_CONFIG"
+        echo -n "  Ryu: "
+        if [ $(curl -o "$FILE_PATH" -s -H "Cookie: $COOKIE" -H "User-Agent: $AGENT" -w "%{http_code}" -L "${URL_RYU}${APPID}&file_type=manifest") == "200" ]; then
+            echo -e "${GREEN}SUCESSO${NC}"; FOUND=true
+        else
+            echo -e "${RED}INDISPONÍVEL${NC}"; rm -f "$FILE_PATH"
+        fi
+    fi
+
+    # Sushi
+    if [ "$FOUND" = false ]; then
+        echo -n "  Sushi: "
+        if [ $(curl -o "$FILE_PATH" -s -w "%{http_code}" -L "${URL_SUSHI}${APPID}.zip") == "200" ]; then
+            echo -e "${GREEN}SUCESSO${NC}"; FOUND=true
+        else
+            echo -e "${RED}INDISPONÍVEL${NC}"; rm -f "$FILE_PATH"
+        fi
+    fi
+
+    if [ "$FOUND" = true ]; then
+        echo -e "\n  ${GREEN}Download concluído.${NC}"
+        echo -e "  Salvo em: ${CYAN}${FILE_PATH}${NC}"
+        if [ -f "$FILE_ACCELA_CONFIG" ]; then
+            echo -e "  ${YELLOW}Enviando para Accela CLI...${NC}"
+            "$BIN_REAL_ACCELA" --cli "$FILE_PATH"
+        fi
+    else
+        echo -e "\n  ${RED}Nenhum arquivo encontrado.${NC}"
+    fi
+    echo ""
+    read -p "  Enter para voltar..."
+}
+
 menu_accela() {
     while true; do
         show_header
-        echo -e "CONFIG ACCELA"
-        echo -e "─────────────"
-        echo ""
 
         if [ ! -f "$BIN_REAL_ACCELA" ]; then
             echo -e "STATUS ATUAL: [${RED}PENDENTE${NC}] (Não instalado)"
@@ -189,41 +279,44 @@ menu_accela() {
             echo -e "> O comando de instalação utiliza curl e bash."
             echo -e "> Créditos: ${CYAN}https://github.com/ciscosweater/enter-the-wired${NC}"
             echo -e "> Os scripts são instalados em ~/.local/share/ACCELA/"
-            echo -e "${CYAN}------------------------------------------${NC}"
+            divider
             echo -e "\nDESEJA INSTALAR AGORA?"
-            echo -e "\n[1] Sim, executar enter-the-wired"
-            echo -e "[2] Não"
+            echo ""
+            echo -e "  [${GREEN}1${NC}] Sim, executar enter-the-wired"
+            echo -e "  [${RED}0${NC}] Voltar"
         else
             if [ -f "$FILE_ACCELA_CONFIG" ]; then
                 echo -e "STATUS ATUAL: [${GREEN}ATIVADO${NC}]"
             else
                 echo -e "STATUS ATUAL: [${YELLOW}DESATIVADO${NC}]"
             fi
-            echo -e "\nOs scripts estão em:"
+            echo -e "Os scripts estão em:"
             echo -e "~/.local/share/ACCELA/"
-            echo -e "${CYAN}------------------------------------------${NC}"
-            echo -e "\nO QUE DESEJA FAZER?"
-            [ -f "$FILE_ACCELA_CONFIG" ] && echo -e "\n[1] Desativar integração" || echo -e "\n[1] Ativar integração"
-            echo -e "[2] Configurar conquistas"
-            echo -e "[3] Atualizar Accela"
-            echo -e "[4] Atualizar SLSsteam"
-            echo -e "[5] Atualizar enter-the-wired"
-            echo -e "[6] Remover tudo"
-            echo -e "[7] Voltar"
-            echo -e "${CYAN}------------------------------------------${NC}"
+            divider
+            if [ -f "$FILE_ACCELA_CONFIG" ]; then
+                echo -e "  [${RED}1${NC}] Desativar integração"
+            else
+                echo -e "  [${BLUE}1${NC}] Ativar integração"
+            fi
+            echo -e "  [${BLUE}2${NC}] Configurar conquistas"
+            echo -e "  [${GREEN}3${NC}] Atualizar Accela"
+            echo -e "  [${GREEN}4${NC}] Atualizar SLSsteam"
+            echo -e "  [${GREEN}5${NC}] Atualizar enter-the-wired"
+            echo -e "  [${RED}6${NC}] Remover tudo"
+            echo -e "  [${RED}0${NC}] Voltar"
+            divider
         fi
 
-        echo ""
-        read -p "Selecione: " SUB_OPT
+        read -p "> " SUB_OPT
 
         if [ ! -f "$BIN_REAL_ACCELA" ]; then
             case $SUB_OPT in
                 1) 
                     echo -e "\n${CYAN}Iniciando instalação...${NC}"
                     curl -fsSL https://raw.githubusercontent.com/aglairdev/enter-the-wired/main/enter-the-wired | bash
-                    read -p "Pressione Enter para continuar..." 
+                    read -p "  Enter para continuar..." 
                     ;;
-                2) return ;;
+                0) return ;;
                 *) echo -e "${RED}Opção inválida.${NC}"; sleep 1 ;;
             esac
         else
@@ -239,27 +332,27 @@ menu_accela() {
                 2)
                     source "$HOME/.local/share/ACCELA/.venv/bin/activate" && python3 "$HOME/.local/share/ACCELA/src/deps/SLScheevo/SLScheevo.py"
                     deactivate 2>/dev/null
-                    read -p "Pressione Enter para continuar..."
+                    read -p "  Enter para continuar..."
                     ;;
-                3) [ -f "$BIN_ACCELA" ] && bash "$BIN_ACCELA" || echo -e "${RED}Erro: Script ausente.${NC}"; read -p "Enter..." ;;
-                4) [ -f "$BIN_SLS" ] && bash "$BIN_SLS" || echo -e "${RED}Erro: Script ausente.${NC}"; read -p "Enter..." ;;
+                3) [ -f "$BIN_ACCELA" ] && bash "$BIN_ACCELA" || echo -e "${RED}Erro: Script ausente.${NC}"; read -p "  Enter..." ;;
+                4) [ -f "$BIN_SLS" ] && bash "$BIN_SLS" || echo -e "${RED}Erro: Script ausente.${NC}"; read -p "  Enter..." ;;
                 5)
                     echo -e "\n${CYAN}Atualizando enter-the-wired...${NC}"
                     curl -fsSL https://raw.githubusercontent.com/aglairdev/enter-the-wired/main/enter-the-wired | bash
-                    read -p "Pressione Enter para continuar..."
+                    read -p "  Enter para continuar..."
                     ;;
                 6) 
-                    read -p "Remover Accela, SLSsteam, SLScheevo, Steamless? (s/n): " CONFIRM
+                    read -p "  Remover Accela, SLSsteam, SLScheevo, Steamless? (s/n): " CONFIRM
                     if [ "$CONFIRM" = "s" ]; then
                         [ -f "$BIN_UNINSTALL" ] && bash "$BIN_UNINSTALL"
                         rm -f "$FILE_ACCELA_CONFIG"
                         rm -rf "$DIR_WIRED" "$HOME/.local/share/ACCELA"
-                        echo -e "\n${GREEN}Limpeza completa concluída.${NC}"
-                        read -p "Enter..."
+                        echo -e "\n  ${GREEN}Limpeza completa concluída.${NC}"
+                        read -p "  Enter..."
                         return
                     fi
                     ;;
-                7) return ;;
+                0) return ;;
                 *) echo -e "${RED}Opção inválida.${NC}"; sleep 1 ;;
             esac
         fi
@@ -271,132 +364,50 @@ apply_accela_defaults
 
 while true; do
     show_header
-    echo -e "FONTES"
-    echo -e "──────"
-    [ -f "$FILE_MOR_CONFIG" ] && echo -e "Morrenus  [${GREEN}PRONTO${NC}]" || echo -e "Morrenus  [${RED}PENDENTE${NC}]"
-    [ -f "$FILE_RYU_CONFIG" ] && echo -e "Ryu       [${GREEN}PRONTO${NC}]" || echo -e "Ryu       [${RED}PENDENTE${NC}]"
-    echo -e "Sushi     [${GREEN}PRONTO${NC}]"
-    echo -e "${CYAN}------------------------------------------${NC}"
-    echo -e "\nINTEGRAÇÃO"
-    echo -e "──────────"
+    [ -f "$FILE_MOR_CONFIG" ] && echo -e "  Morrenus  [${GREEN}PRONTO${NC}]" || echo -e "  Morrenus  [${RED}PENDENTE${NC}]"
+    [ -f "$FILE_RYU_CONFIG" ] && echo -e "  Ryu       [${GREEN}PRONTO${NC}]" || echo -e "  Ryu       [${RED}PENDENTE${NC}]"
+    echo -e "  Sushi     [${GREEN}PRONTO${NC}]"
+    divider
     if [ ! -f "$BIN_REAL_ACCELA" ]; then
-        echo -e "Accela    [${RED}PENDENTE${NC}]"
+        echo -e "  Accela    [${RED}PENDENTE${NC}]"
     elif [ -f "$FILE_ACCELA_CONFIG" ]; then
-        echo -e "Accela    [${GREEN}ATIVADO${NC}]"
+        echo -e "  Accela    [${GREEN}ATIVADO${NC}]"
     else
-        echo -e "Accela    [${YELLOW}DESATIVADO${NC}]"
+        echo -e "  Accela    [${YELLOW}DESATIVADO${NC}]"
     fi
-    echo -e "${CYAN}------------------------------------------${NC}"
-    echo -e "\n1. Baixar manifests"
-    echo "2. Configurar Morrenus"
-    echo "3. Configurar Ryu"
-    echo "4. Configurar Accela"
-    echo "5. Sair"
-    echo -e "${CYAN}------------------------------------------${NC}"
-    echo ""
-    read -p "Selecione: " OPT
+    divider
+    echo -e "  [${GREEN}1${NC}] Baixar manifests"
+    echo -e "  [${BLUE}2${NC}] Configurar Morrenus"
+    echo -e "  [${BLUE}3${NC}] Configurar Ryu"
+    echo -e "  [${BLUE}4${NC}] Configurar Accela"
+    echo -e "  [${RED}0${NC}] Sair"
+    divider
+    read -p "> " OPT
 
     case $OPT in
-        1)
-            echo ""
-            read -p "$(echo -e "AppID ou Nome (${RED}q${NC} para voltar): ")" USER_INPUT
-            if [[ "$USER_INPUT" == "q" ]]; then
-                continue
-            fi
-
-            APPID=$(resolve_appid "$USER_INPUT")
-
-            if [ "$APPID" == "ERRO" ]; then
-                echo -e "${RED}Não encontrei nada para: $USER_INPUT${NC}"; read -p "Enter para voltar..."; continue
-            elif [ "$APPID" == "CANCEL" ]; then
-                continue
-            fi
-
-            FILENAME=$(get_clean_filename "$APPID")
-            FILE_PATH="${DIR_DOWNLOAD}/${FILENAME}"
-
-            show_header
-            echo -e "\nAppID: ${APPID}"
-            echo -e "${CYAN}------------------------------------------${NC}\n"
-            FOUND=false
-
-            # Morrenus
-            if [ -f "$FILE_MOR_CONFIG" ]; then
-                source "$FILE_MOR_CONFIG"
-                echo -n "Morrenus: "
-                HTTP_STATUS=$(curl -o "$FILE_PATH" -s -H "Authorization: Bearer $KEY" -w "%{http_code}" -L "${URL_MORRENUS}${APPID}")
-                if [ "$HTTP_STATUS" == "200" ]; then
-                    echo -e "${GREEN}SUCESSO${NC}"; FOUND=true
-                elif [ "$HTTP_STATUS" == "401" ] || [ "$HTTP_STATUS" == "403" ]; then
-                    echo -e "${RED}CHAVE EXPIRADA${NC}"; rm -f "$FILE_MOR_CONFIG" "$FILE_PATH"
-                else
-                    echo -e "${RED}INDISPONÍVEL${NC}"; rm -f "$FILE_PATH"
-                fi
-            fi
-
-            # Ryu
-            if [ "$FOUND" = false ] && [ -f "$FILE_RYU_CONFIG" ]; then
-                source "$FILE_RYU_CONFIG"
-                echo -n "Ryu: "
-                if [ $(curl -o "$FILE_PATH" -s -H "Cookie: $COOKIE" -H "User-Agent: $AGENT" -w "%{http_code}" -L "${URL_RYU}${APPID}&file_type=manifest") == "200" ]; then
-                    echo -e "${GREEN}SUCESSO${NC}"; FOUND=true
-                else
-                    echo -e "${RED}INDISPONÍVEL${NC}"; rm -f "$FILE_PATH"
-                fi
-            fi
-
-            # Sushi
-            if [ "$FOUND" = false ]; then
-                echo -n "Sushi: "
-                if [ $(curl -o "$FILE_PATH" -s -w "%{http_code}" -L "${URL_SUSHI}${APPID}.zip") == "200" ]; then
-                    echo -e "${GREEN}SUCESSO${NC}"; FOUND=true
-                else
-                    echo -e "${RED}INDISPONÍVEL${NC}"; rm -f "$FILE_PATH"
-                fi
-            fi
-            
-            if [ "$FOUND" = true ]; then
-                echo -e "\n${GREEN}Download concluído.${NC}"
-                echo ""
-                echo -e "Salvo em: ${CYAN}${FILE_PATH}${NC}"
-                
-                if [ -f "$FILE_ACCELA_CONFIG" ]; then
-                    echo -e "${YELLOW}Enviando para Accela CLI...${NC}"
-                    "$BIN_REAL_ACCELA" --cli "$FILE_PATH"
-                fi
-            else
-                echo -e "\n${RED}Nenhum arquivo encontrado.${NC}"
-            fi
-            echo ""
-            read -p "Enter para voltar..."
-            ;;
+        1) menu_baixar ;;
         2)
             show_header
-            echo -e "CONFIG MORRENUS\n───────────────\n"
             echo -e "> Acesse: ${CYAN}https://hubcapmanifest.com/${NC}"
-            echo -e "${CYAN}------------------------------------------${NC}"
-            echo ""
+            divider
             read -p "$(echo -e "API Key (${RED}q${NC} para voltar): ")" API_KEY
             if [ "$API_KEY" != "q" ]; then
                 if [[ "$API_KEY" =~ ^smm_[a-f0-9]{96}$ ]]; then
                     mkdir -p "$DIR_CONFIG"
                     echo "KEY='$API_KEY'" > "$FILE_MOR_CONFIG"
-                    echo -e "\n${GREEN}Configurado!${NC}"
+                    echo -e "\n  ${GREEN}Configurado!${NC}"
                 else
-                    echo -e "\n${RED}Chave inválida.${NC}"
+                    echo -e "\n  ${RED}Chave inválida.${NC}"
                 fi
                 sleep 2
             fi
             ;;
         3)
             show_header
-            echo -e "CONFIG RYU\n──────────\n"
             echo "Siga os passos:"
-            echo ""
             echo -e "1. Acesse: ${CYAN}https://generator.ryuu.lol/${NC}"
             echo "2. F12 > F5 > Network > Filter URLs > download > Copy as cURL"
-            echo -e "${CYAN}------------------------------------------${NC}"
-            echo ""
+            divider
             read -p "$(echo -e "Cole o comando (${RED}q${NC} para voltar): ")" CURL_CMD
             if [ "$CURL_CMD" != "q" ]; then
                 COOKIE=$(echo "$CURL_CMD" | grep -oP "Cookie: \K[^']+")
@@ -405,15 +416,15 @@ while true; do
                     mkdir -p "$DIR_CONFIG"
                     echo "COOKIE='$COOKIE'" > "$FILE_RYU_CONFIG"
                     echo "AGENT='$AGENT'" >> "$FILE_RYU_CONFIG"
-                    echo -e "\n${GREEN}Configurado!${NC}"
+                    echo -e "\n  ${GREEN}Configurado!${NC}"
                 else
-                    echo -e "\n${RED}Dados inválidos.${NC}"
+                    echo -e "\n  ${RED}Dados inválidos.${NC}"
                 fi
                 sleep 2
             fi
             ;;
         4) menu_accela ;;
-        5) exit 0 ;;
+        0) exit 0 ;;
         *) echo -e "${RED}Opção inválida.${NC}"; sleep 1 ;;
     esac
 done
