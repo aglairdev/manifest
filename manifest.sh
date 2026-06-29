@@ -70,7 +70,7 @@ divider() {
 show_header() {
     clear
     echo ""
-    echo -e "v${VERSION} // Manifest ${AGL}"
+    echo -e "  ${ST_PRATA}v${VERSION} // Manifest ${AGL}${NC}"
     divider
 }
 
@@ -197,7 +197,7 @@ except:
 
 menu_baixar() {
     show_header
-    read -p "$(echo -e "AppID ou Nome (${RED}q${NC} para voltar): ")" USER_INPUT
+    read -p "$(echo -e "  AppID ou Nome (${RED}q${NC} para voltar): ")" USER_INPUT
     if [[ "$USER_INPUT" == "q" ]]; then return; fi
 
     APPID=$(resolve_appid "$USER_INPUT")
@@ -285,12 +285,12 @@ menu_accela() {
             echo -e "  [${RED}0${NC}] Voltar"
         else
             if [ -f "$FILE_ACCELA_CONFIG" ]; then
-                echo -e "STATUS ATUAL: [${GREEN}ATIVADO${NC}]"
+                echo -e "  STATUS ATUAL: [${GREEN}ATIVADO${NC}]"
             else
-                echo -e "STATUS ATUAL: [${YELLOW}DESATIVADO${NC}]"
+                echo -e "  STATUS ATUAL: [${YELLOW}DESATIVADO${NC}]"
             fi
-            echo -e "Os scripts estão em:"
-            echo -e "~/.local/share/ACCELA/"
+            echo -e "  Os scripts estão em:"
+            echo -e "  ~/.local/share/ACCELA/"
             divider
             if [ -f "$FILE_ACCELA_CONFIG" ]; then
                 echo -e "  [${RED}1${NC}] Desativar integração"
@@ -387,9 +387,9 @@ while true; do
         1) menu_baixar ;;
         2)
             show_header
-            echo -e "> Acesse: ${CYAN}https://hubcapmanifest.com/${NC}"
+            echo -e "  > Acesse: ${CYAN}https://hubcapmanifest.com/${NC}"
             divider
-            read -p "$(echo -e "API Key (${RED}q${NC} para voltar): ")" API_KEY
+            read -p "$(echo -e "  API Key (${RED}q${NC} para voltar): ")" API_KEY
             if [ "$API_KEY" != "q" ]; then
                 if [[ "$API_KEY" =~ ^smm_[a-f0-9]{96}$ ]]; then
                     mkdir -p "$DIR_CONFIG"
@@ -403,11 +403,11 @@ while true; do
             ;;
         3)
             show_header
-            echo "Siga os passos:"
-            echo -e "1. Acesse: ${CYAN}https://generator.ryuu.lol/${NC}"
-            echo "2. F12 > F5 > Network > Filter URLs > download > Copy as cURL"
+            echo "  Siga os passos:"
+            echo -e "  1. Acesse: ${CYAN}https://generator.ryuu.lol/${NC}"
+            echo "  2. F12 > F5 > Network > Filter URLs > download > Copy as cURL"
             divider
-            read -p "$(echo -e "Cole o comando (${RED}q${NC} para voltar): ")" CURL_CMD
+            read -p "$(echo -e "  Cole o comando (${RED}q${NC} para voltar): ")" CURL_CMD
             if [ "$CURL_CMD" != "q" ]; then
                 COOKIE=$(echo "$CURL_CMD" | grep -oP "Cookie: \K[^']+")
                 AGENT=$(echo "$CURL_CMD" | grep -oP "User-Agent: \K[^']+")
