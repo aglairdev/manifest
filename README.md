@@ -1,17 +1,5 @@
 <div align="center">
 
-<img width="217" height="216" alt="lain-gif" src="https://github.com/user-attachments/assets/970e80ad-9a7e-43d1-b541-0c261c4abd77" />
-
-</div>
-
-## Que isso?
-
-Buscador de manifests.
-
-![Shell](https://img.shields.io/badge/Shell-333333?style=flat-square&logo=gnu-bash&logoColor=white)
-
-<div align="center">
-
 | Menu | Config |
 |:----:|:------:|
 | <img src="https://github.com/user-attachments/assets/fac10755-9fc9-4ac7-9f4b-e5de14f0ddba" alt="Menu demo" width="350"> | <img src="https://github.com/user-attachments/assets/292bb8c0-a345-4450-a19f-df8279f6f97a" alt="Config demo" width="350"> |
@@ -67,8 +55,17 @@ Buscador de manifests.
 
 ## Instalação 
 
+> [!NOTE]
+> `~/.local/bin` precisa está no seu **PATH** para chamar de qualquer lugar.
+
 ```bash
 curl -sSL https://raw.githubusercontent.com/aglairdev/Manifest/main/install.sh | bash
+```
+
+## Uso
+
+```bash
+manifest
 ```
 
 ## Remoção
