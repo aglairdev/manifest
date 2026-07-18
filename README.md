@@ -1,6 +1,6 @@
 <div align="center">
 
-[![MANIFEST](https://img.shields.io/badge/MANIFEST-367D28?style=for-the-badge)](https://github.com/aglairdev/Manifest)
+<img width="217" height="216" alt="lain-gif" src="https://github.com/user-attachments/assets/970e80ad-9a7e-43d1-b541-0c261c4abd77" />
 
 </div>
 
